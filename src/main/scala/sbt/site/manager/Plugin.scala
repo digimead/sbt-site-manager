@@ -19,16 +19,21 @@
 package sbt.site.manager
 
 import java.util.Properties
+
+import org.digimead.booklet.Settings
 import org.digimead.booklet.template.BookletStorage
 import org.digimead.booklet.template.Produce
+
 import sbt.Keys._
 import sbt.site.manager.Keys._
 import sbt.std.TaskStreams
+
 import sbt._
-import org.digimead.booklet.Booklet
-import org.digimead.booklet.Settings
 
 object Plugin {
+
+  val bookletVersion = "0.1.0.7-SNAPSHOT"
+
   /** Name of the directory where composed site is located. */
   val siteComposedDirectoryName = "composed"
   /** Name of the directory where per block information is located. */
@@ -39,8 +44,9 @@ object Plugin {
     siteExportBookletApp <<= siteExportBookletAppTask,
     siteExportBookletTemplates <<= siteExportBookletTemplatesTask,
     siteBlocks := Seq(),
-    siteBlocks <+= siteMappingForScalaDoc(),
-    siteBlocks <+= siteMappingForBooklet(),
+    // for example: siteBlocks <+= siteMappingForScalaDoc(),
+    // for example: siteBlocks <+= siteMappingForBooklet(),
+    // for example: siteBlocks <+= siteMappingForBooklet(input = _ / "myBooklet"),
     siteShowBrief <<= siteShowTask(false),
     siteShowDetailed <<= siteShowTask(true),
     target <<= (target in Compile)(_ / "site")))
@@ -53,13 +59,21 @@ object Plugin {
       s"${relativeTo(block.base)(block.input) getOrElse block.input} -> ${relativeTo(block.base)(output) getOrElse output}.")
     if (!bookletProperties.isEmpty())
       arg.log.info(logPrefix(arg.name) + s"Block '${block.blockId.name}' properties are: \n" + bookletProperties)
-    val cached = FileFunction.cached(block.output / siteBlocksDirectoryName / (block.blockId.name + ".build.cache"), FilesInfo.hash) { _ ⇒
+    val cacheFile = block.output / siteBlocksDirectoryName / (block.blockId.name + ".build.cache")
+    val cached = FileFunction.cached(cacheFile, FilesInfo.hash) { _ ⇒
       IO.delete((output ** AllPassFilter --- output).get)
+      arg.log.debug(logPrefix(arg.name) + s"Produce and store content to " + output)
       Produce(BookletStorage(block.input, bookletProperties).globalized, output)
       (output ** AllPassFilter --- output).get.toSet
     }
-    val cacheInputs = (block.input ** AllPassFilter --- block.input).get.toSet
-    cached(cacheInputs) x relativeTo(output)
+    val cacheInputs = (block.input ** AllPassFilter).get.toSet
+    /*
+     * We must append 'block.input' to input argument
+     *   because if cacheInputs is empty then cache is not updated
+     * We must remove 'block.input' from output
+     *   because 'block.input' havn't any mapping
+     */
+    cached(cacheInputs + block.input) --- block.input x relativeTo(output)
   }
   def compileTask = (siteBlocks in SiteConf, baseDirectory, state, streams, thisProjectRef) map { (siteBlocks, baseDirectory, state, streams, thisProjectRef) ⇒
     import Support._
@@ -76,12 +90,12 @@ object Plugin {
       val launcher = try new File(appConfiguration.provider().scalaProvider().launcher().
         getClass().getProtectionDomain().getCodeSource().getLocation().toURI())
       catch { case e: Throwable ⇒ new File("sbt-launch.jar") }
-      val configuration = """[scala]
+      val configuration = ("""[scala]
        |  version: 2.10.3
        |[app]
        |  org: org.digimead
        |  name: booklet-app
-       |  version: 0.1.0.1-SNAPSHOT
+       |  version: """ + bookletVersion + """
        |  class: org.digimead.booklet.Application
        |  cross-versioned: binary
        |[repositories]
@@ -89,7 +103,7 @@ object Plugin {
        |  maven-central
        |  digimead-maven: http://storage.googleapis.com/maven.repository.digimead.org/
        |[boot]
-       |  directory: ${user.home}/.sbt/booklet-boot""".stripMargin.split("\n")
+       |  directory: ${user.home}/.sbt/booklet-boot""").stripMargin.split("\n")
       val configurationLocation = target / "booklet-app.configuration"
       IO.writeLines(configurationLocation, configuration)
       arg.log.info(logPrefix(arg.name) + s"java -Dsbt.boot.properties=${configurationLocation} -jar ${launcher} -h")
@@ -148,19 +162,22 @@ object Plugin {
   def siteMappingForBooklet(id: Symbol = 'Booklet,
     input: File ⇒ File = _ / "docs",
     nestedDirectory: Option[String] = None,
-    bookletProperties: Properties = new Properties) =
+    bookletProperties: Properties = new Properties,
+    userMapping: Seq[(File, String)] ⇒ Seq[(File, String)] = n ⇒ n) =
     (baseDirectory, target in SiteConf, state, streams, thisProjectRef) map { (baseDirectory, target, state, streams, thisProjectRef) ⇒
       implicit val arg = TaskArgument(state, thisProjectRef, Some(streams))
-      new BookletBlock(baseDirectory, id, booklet(_, bookletProperties), input(baseDirectory), nestedDirectory, target)
+      new BookletBlock(baseDirectory, id, booklet(_, bookletProperties), input(baseDirectory), nestedDirectory, target, userMapping)
     }
   /** Build Scala doc site block with default settings. */
   def siteMappingForScalaDoc(id: Symbol = 'ScalaDoc,
     nestedDirectory: Option[String] = Some("api"),
-    mappings: TaskKey[Seq[(File, String)]] = mappings in packageDoc in Compile) =
-    (mappings, target in SiteConf) map { (m, site) ⇒ new MappingBlock(id, nestedDirectory, m, site) }
+    mappings: TaskKey[Seq[(File, String)]] = mappings in packageDoc in Compile,
+    userMapping: Seq[(File, String)] ⇒ Seq[(File, String)] = n ⇒ n) =
+    (mappings, target in SiteConf) map { (m, site) ⇒ new MappingBlock(id, nestedDirectory, m, site, userMapping) }
 
   /**
    * Container for booklet site block.
+   *
    * @param base base project directory
    * @param blockId unique block Id
    * @param booklet booklet generation function
@@ -169,9 +186,9 @@ object Plugin {
    * @param output target directory
    */
   class BookletBlock(val base: File, blockId: Symbol, val booklet: BookletBlock ⇒ Seq[(File, String)],
-    val input: File, nestedDirectory: Option[String], output: File)
+    val input: File, nestedDirectory: Option[String], output: File, userMapping: Seq[(File, String)] ⇒ Seq[(File, String)] = n ⇒ n)
     extends GenericBlock(blockId, nestedDirectory, output) {
-    def mapping: Seq[(File, String)] = booklet(this)
+    def mapping: Seq[(File, String)] = userMapping(for ((f, d) ← booklet(this)) yield (f, nestedDirectory.map(_ + "/" + d).getOrElse(d)))
     def siteUpdate()(implicit arg: Plugin.TaskArgument) = {
       arg.log.info(Support.logPrefix(arg.name) + s"Update '${blockId.name}' block")
       val mapping = this.mapping
@@ -182,15 +199,16 @@ object Plugin {
   }
   /**
    * Container for SBT mapping site block.
+   *
    * @param blockId unique block Id
-   * @param cache cache directory
    * @param nestedDirectory directory of content within site
    * @param origin SBT mapping
    * @param output target directory
    */
-  class MappingBlock(blockId: Symbol, nestedDirectory: Option[String], origin: ⇒ Seq[(File, String)], output: File)
+  class MappingBlock(blockId: Symbol, nestedDirectory: Option[String], origin: ⇒ Seq[(File, String)],
+    output: File, userMapping: Seq[(File, String)] ⇒ Seq[(File, String)] = n ⇒ n)
     extends GenericBlock(blockId, nestedDirectory, output) {
-    def mapping = for ((f, d) ← origin) yield (f, nestedDirectory.map(_ + "/" + d).getOrElse(d))
+    def mapping = userMapping(for ((f, d) ← origin) yield (f, nestedDirectory.map(_ + "/" + d).getOrElse(d)))
     def siteUpdate()(implicit arg: Plugin.TaskArgument): Traversable[(File, File)] = {
       arg.log.info(Support.logPrefix(arg.name) + s"Update '${blockId.name}' block")
       val actualMapping = (origin.map(_._1), mapping.map(output / siteComposedDirectoryName / _._2)).zipped
@@ -200,6 +218,7 @@ object Plugin {
   }
   /**
    * Container for generic site block.
+   *
    * @param blockId unique block Id
    * @param nestedDirectory directory of content within site
    * @param output target directory

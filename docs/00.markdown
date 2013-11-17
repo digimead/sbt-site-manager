@@ -1,0 +1,15 @@
+---
+
+out: index.html
+
+---
+
+SBT Site Manager
+================
+
+*SBT Site Manager* is a plugin for SBT for publishing user documentation of Scala software.
+It is based on *Booklet* which is a fork of *Pamflet* and used *Scalate* for documentation generation.
+
+> [Latest stable version $version$]($stable$)
+
+> [Latest development version $version$]($development$)
