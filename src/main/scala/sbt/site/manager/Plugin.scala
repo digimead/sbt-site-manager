@@ -32,7 +32,7 @@ import sbt._
 
 object Plugin {
 
-  val bookletVersion = "0.1.0.7-SNAPSHOT"
+  val bookletVersion = "0.1.0.99-SNAPSHOT"
 
   /** Name of the directory where composed site is located. */
   val siteComposedDirectoryName = "composed"

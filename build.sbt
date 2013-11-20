@@ -62,6 +62,6 @@ sourceGenerators in Compile <+= (sbtVersion, sourceDirectory in Compile, sourceM
   generated.map(_._2).filter(_.getName endsWith ".scala")
 }
 
-libraryDependencies += "org.digimead" %% "booklet-library" % "0.1.0.8-SNAPSHOT"
+libraryDependencies += "org.digimead" %% "booklet-library" % "0.1.0.99-SNAPSHOT"
 
 libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.5"
