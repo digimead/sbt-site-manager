@@ -1,15 +1,36 @@
 ---
-
 out: index.html
-
 ---
 
 SBT Site Manager
 ================
 
-*SBT Site Manager* is a plugin for SBT for publishing user documentation of Scala software.
-It is based on *Booklet* which is a fork of *Pamflet* and used *Scalate* for documentation generation.
+*SBT Site Manager* is a plugin for SBT. It add routines to publish composit documentation that consists from markdown files and [Scalate][sc] templates. This bind together awesome opportunity for customisation of [L&F][lf] and fast, plain markdown syntax.
+
+The plugin is based on [Booklet][bl] library.
+
+The necessity to write this plugin is lack of some critical functionality in [sbt-site][ss]
+
+The differences of *SBT Site Manager*.
+
+Pros:
+
+* [Booklet][bl] support :-) with template offload and user properties
+* brief and full diagnostics of site blocks
+
+Cons:
+
+* lack of support of [Sphinx][sx], [Jekyll][jk], [Pamflet][pf], but this may be added within minutes if needed. Is this needed?
+
 
 > [Latest stable version $version$]($stable$)
 
 > [Latest development version $version$]($development$)
+
+[lf]: http://en.wikipedia.org/wiki/Look_and_feel
+[sc]: http://scalate.fusesource.org/
+[bl]: http://digimead-specific.github.io/Booklet/
+[sx]: http://sphinx-doc.org/
+[jk]: http://jekyllrb.com/
+[pf]: http://pamflet.databinder.net/
+[ss]:
