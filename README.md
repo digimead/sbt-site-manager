@@ -6,3 +6,6 @@ sbt-site-manager [![Build Status](https://travis-ci.org/digimead/sbt-site-manage
 The plugin is based on [Booklet][bl] library.
 
 [See SBT Site Manager documentation](http://digimead.github.io/sbt-site-manager/).
+[lf]: http://en.wikipedia.org/wiki/Look_and_feel
+[sc]: http://scalate.fusesource.org/
+[bl]: http://digimead-specific.github.io/Booklet/
