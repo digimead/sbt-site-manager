@@ -1,9 +1,15 @@
-> osgiShow
+> site:siteShowBrief
 
--$ exists target/deps/
--$ exists target/osgi/
-> osgiResolve
-> dependencyFetch
-$ exists target/osgi/
-$ exists target/deps/org.eclipse.ui-3.103.0.v20120705-114351.jar
+-$ exists target/site/composed/index.html
+> site:compile
+$ exists target/site/composed/index.html
+
+-$ exists target/booklet-app.configuration
+> site:siteExportBookletApp
+$ exists target/booklet-app.configuration
+
+-$ exists docs/template
+> site:siteExportBookletTemplates
+$ exists docs/template
+
 > clean

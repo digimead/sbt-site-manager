@@ -5,18 +5,18 @@ out: index.html
 SBT Site Manager
 ================
 
-*SBT Site Manager* is a plugin for SBT. It add routines to publish composit documentation that consists from markdown files and [Scalate][sc] templates. This bind together awesome opportunity for customisation of [L&F][lf] and fast, plain markdown syntax.
+*SBT Site Manager* is SBT plugin that adds routines for publishing composite documentation. That documentation is combined from different blocks like markdown files which is transformed with [Scalate][sc] templates, API pages, various static content. This integration of pre-generated, static and dynamic contents brings awesome opportunity for customisation of [L&F][lf] with fast and simple documentation process.
 
 The plugin is based on [Booklet][bl] library.
 
 The necessity to write this plugin is lack of some critical functionality in [sbt-site][ss]
 
-The differences of *SBT Site Manager*.
+The difference between  *SBT Site Manager* and [sbt-site][ss]:
 
 Pros:
 
 * [Booklet][bl] support :-) with template offload and user properties
-* brief and full diagnostics of site blocks
+* brief and full diagnostics of composite structure
 
 Cons:
 
@@ -33,4 +33,4 @@ Cons:
 [sx]: http://sphinx-doc.org/
 [jk]: http://jekyllrb.com/
 [pf]: http://pamflet.databinder.net/
-[ss]:
+[ss]: https://github.com/sbt/sbt-site

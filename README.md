@@ -1,7 +1,7 @@
 sbt-site-manager [![Build Status](https://travis-ci.org/digimead/sbt-site-manager.png)](https://travis-ci.org/digimead/sbt-site-manager)
 ================
 
-*SBT Site Manager* is a plugin for SBT. It add routines to publish composit documentation that consists from markdown files and [Scalate][sc] templates. This bind together awesome opportunity for customisation of [L&F][lf] and fast, plain markdown syntax.
+*SBT Site Manager* is SBT plugin that adds routines for publishing composite documentation. That documentation is combined from different blocks like markdown files which is transformed with [Scalate][sc] templates, API pages, various static content. This integration of pre-generated, static and dynamic contents brings awesome opportunity for customisation of [L&F][lf] with fast and simple documentation process.
 
 The plugin is based on [Booklet][bl] library.
 
