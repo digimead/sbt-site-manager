@@ -25,14 +25,14 @@ import org.digimead.booklet.template.BookletStorage
 import org.digimead.booklet.template.Produce
 
 import sbt.Keys._
-import sbt.site.manager.Keys._
+import sbt.site.manager.SiteManagerKeys._
 import sbt.std.TaskStreams
 
 import sbt._
 
-object Plugin {
+object SiteManagerPlugin {
 
-  val bookletVersion = "0.1.0.100-SNAPSHOT"
+  val bookletVersion = "0.1.0.101-SNAPSHOT"
 
   /** Name of the directory where composed site is located. */
   val siteComposedDirectoryName = "composed"
@@ -52,7 +52,7 @@ object Plugin {
     target <<= (target in Compile)(_ / "site")))
 
   /** Generate booklet site block. */
-  def booklet(block: BookletBlock, bookletProperties: Properties)(implicit arg: Plugin.TaskArgument) = {
+  def booklet(block: BookletBlock, bookletProperties: Properties)(implicit arg: SiteManagerPlugin.TaskArgument) = {
     import Support._
     val output = block.output / siteBlocksDirectoryName / block.blockId.name
     arg.log.info(logPrefix(arg.name) + s"Transform '${block.blockId.name}': " +
@@ -189,7 +189,7 @@ object Plugin {
     val input: File, nestedDirectory: Option[String], output: File, userMapping: Seq[(File, String)] ⇒ Seq[(File, String)] = n ⇒ n)
     extends GenericBlock(blockId, nestedDirectory, output) {
     def mapping: Seq[(File, String)] = userMapping(for ((f, d) ← booklet(this)) yield (f, nestedDirectory.map(_ + "/" + d).getOrElse(d)))
-    def siteUpdate()(implicit arg: Plugin.TaskArgument) = {
+    def siteUpdate()(implicit arg: SiteManagerPlugin.TaskArgument) = {
       arg.log.info(Support.logPrefix(arg.name) + s"Update '${blockId.name}' block")
       val mapping = this.mapping
       val actualMapping = (mapping.map(_._1), mapping.map(output / siteComposedDirectoryName / _._2)).zipped
@@ -209,7 +209,7 @@ object Plugin {
     output: File, userMapping: Seq[(File, String)] ⇒ Seq[(File, String)] = n ⇒ n)
     extends GenericBlock(blockId, nestedDirectory, output) {
     def mapping = userMapping(for ((f, d) ← origin) yield (f, nestedDirectory.map(_ + "/" + d).getOrElse(d)))
-    def siteUpdate()(implicit arg: Plugin.TaskArgument): Traversable[(File, File)] = {
+    def siteUpdate()(implicit arg: SiteManagerPlugin.TaskArgument): Traversable[(File, File)] = {
       arg.log.info(Support.logPrefix(arg.name) + s"Update '${blockId.name}' block")
       val actualMapping = (origin.map(_._1), mapping.map(output / siteComposedDirectoryName / _._2)).zipped
       Sync(output / siteBlocksDirectoryName / (blockId.name + ".update.cache"))(actualMapping)
@@ -225,7 +225,7 @@ object Plugin {
    */
   abstract class GenericBlock(val blockId: Symbol, val nestedDirectory: Option[String], val output: File) {
     def mapping: Seq[(File, String)]
-    def siteUpdate()(implicit arg: Plugin.TaskArgument): Traversable[(File, File)]
+    def siteUpdate()(implicit arg: SiteManagerPlugin.TaskArgument): Traversable[(File, File)]
   }
 
   object Support {
@@ -233,16 +233,16 @@ object Plugin {
     def logPrefix(name: String) = "[Site manager:%s] ".format(name)
 
     /** Display the single property */
-    def show(parameter: String, value: AnyRef, onEmpty: String)(implicit arg: Plugin.TaskArgument): Unit =
+    def show(parameter: String, value: AnyRef, onEmpty: String)(implicit arg: SiteManagerPlugin.TaskArgument): Unit =
       show(parameter, value, Some("", onEmpty))(arg)
     /** Display the single property */
-    def show(parameter: String, value: AnyRef, onEmpty: String, color: String)(implicit arg: Plugin.TaskArgument): Unit =
+    def show(parameter: String, value: AnyRef, onEmpty: String, color: String)(implicit arg: SiteManagerPlugin.TaskArgument): Unit =
       show(parameter, value, Some(color, onEmpty))(arg)
     /** Display the single property */
-    def show(parameter: String, value: AnyRef)(implicit arg: Plugin.TaskArgument): Unit =
+    def show(parameter: String, value: AnyRef)(implicit arg: SiteManagerPlugin.TaskArgument): Unit =
       show(parameter, value, None)(arg)
     /** Display the single property */
-    def show(parameter: String, value: AnyRef, onEmpty: Option[(String, String)])(implicit arg: Plugin.TaskArgument) {
+    def show(parameter: String, value: AnyRef, onEmpty: Option[(String, String)])(implicit arg: SiteManagerPlugin.TaskArgument) {
       val key = if (arg.log.ansiCodesSupported) scala.Console.GREEN + parameter + scala.Console.RESET else parameter
       val message = onEmpty match {
         case Some((color, message)) ⇒

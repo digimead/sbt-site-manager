@@ -25,19 +25,20 @@ import sbt.Keys._
 
 package object manager {
   /** Entry point for the plugin in user's project */
-  def SiteManager = Plugin.defaultSettings
+  def SiteManager = SiteManagerPlugin.defaultSettings
 
+  // SSM SBT Site Manager
   // export declarations for consumer
-  lazy val SiteManagerKey = Keys
-  lazy val SiteManagerConf = Keys.SiteConf
-  def siteBlocks = Keys.siteBlocks
+  lazy val SSMKey = SiteManagerKeys
+  lazy val SSMConf = SiteManagerKeys.SiteConf
+  def siteBlocks = SiteManagerKeys.siteBlocks in SSMConf
 
   def siteMappingForScalaDoc(id: Symbol = 'ScalaDoc, nestedDirectory: Option[String] = Some("api"),
     mappings: TaskKey[Seq[(File, String)]] = mappings in packageDoc in Compile,
     userMapping: Seq[(File, String)] ⇒ Seq[(File, String)] = n ⇒ n) =
-    Plugin.siteMappingForScalaDoc(id, nestedDirectory, mappings, userMapping)
+    SiteManagerPlugin.siteMappingForScalaDoc(id, nestedDirectory, mappings, userMapping)
   def siteMappingForBooklet(id: Symbol = 'Booklet, input: File ⇒ File = _ / "docs",
     nestedDirectory: Option[String] = None, bookletProperties: Properties = new Properties,
     userMapping: Seq[(File, String)] ⇒ Seq[(File, String)] = n ⇒ n) =
-    Plugin.siteMappingForBooklet(id, input, nestedDirectory, bookletProperties, userMapping)
+    SiteManagerPlugin.siteMappingForBooklet(id, input, nestedDirectory, bookletProperties, userMapping)
 }

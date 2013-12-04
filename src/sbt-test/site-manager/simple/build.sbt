@@ -10,4 +10,4 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-Xcheckinit")
 
 logLevel := Level.Debug
 
-siteBlocks in SiteManagerConf <+= siteMappingForBooklet()
+siteBlocks <+= siteMappingForBooklet()

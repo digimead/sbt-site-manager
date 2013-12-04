@@ -22,10 +22,10 @@ import sbt.Keys._
 
 import sbt._
 
-object Keys {
+object SiteManagerKeys {
   def SiteConf = config("site") hide
 
-  lazy val siteBlocks = TaskKey[Seq[Plugin.GenericBlock]]("siteBlocks", "Defines the mappings from a file to a path per site block.")
+  lazy val siteBlocks = TaskKey[Seq[SiteManagerPlugin.GenericBlock]]("siteBlocks", "Defines the mappings from a file to a path per site block.")
   lazy val siteExportBookletApp = TaskKey[Unit]("siteExportBookletApp", "Export booklet configuration and display starting hint.")
   lazy val siteExportBookletTemplates = TaskKey[Unit]("siteExportBookletTemplates", "Export template for all booklet blocks.")
   lazy val siteShowBrief = TaskKey[Unit]("siteShowBrief", "Show brief information about the site manager configuration.")

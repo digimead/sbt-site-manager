@@ -22,6 +22,7 @@ Cons:
 
 * lack of support of [Sphinx][sx], [Jekyll][jk], [Pamflet][pf], but this may be added within minutes if needed. Is this needed?
 
+<hr/>
 
 > [Latest stable version $version$]($stable$)
 
