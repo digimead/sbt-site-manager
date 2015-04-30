@@ -1,7 +1,7 @@
 /**
  * sbt-site-manager - SBT documentation manager.
  *
- * Copyright (c) 2013 Alexey Aksenov ezh@ezh.msk.ru
+ * Copyright (c) 2013-2015 Alexey Aksenov ezh@ezh.msk.ru
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ object SiteManagerPlugin {
      * We must remove 'block.input' from output
      *   because 'block.input' havn't any mapping
      */
-    cached(cacheInputs + block.input) --- block.input x relativeTo(output)
+    cached(cacheInputs + block.input) --- block.input pair relativeTo(output)
   }
   def compileTask = (siteBlocks in SiteConf, baseDirectory, state, streams, thisProjectRef) map { (siteBlocks, baseDirectory, state, streams, thisProjectRef) ⇒
     import Support._
